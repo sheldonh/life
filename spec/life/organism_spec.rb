@@ -1,46 +1,40 @@
 require 'spec_helper'
 
+require 'life/presenter/organism'
 require 'life/organism'
 
 describe Life::Organism do
 
+  let(:parser) { ->(presentation) { Life::Organism.extend(Life::Presenter::Organism).parse presentation } }
+
   describe "single-celled" do
 
+    it "is live if its cell is live" do
+      parser.call('X').should be_live
+    end
+
+    it "is not live if its cell is dead" do
+      parser.call('.').should_not be_live
+    end
+
     it "dies as soon as it ages" do
-      organism = Life::Organism.new(Life::Cell::ALIVE)
-      export { organism.age! }.to change { organism.alive? }.to false
+      parser.call('X').age!.should_not be_live
     end
 
   end
 
-  describe "over time" do
+  describe "block" do
 
-    class SimpleTimer
+    # ....
+    # .XX.
+    # .XX.
+    # ....
+    let(:new_block) { -> { parser.call "....\n.XX.\n.XX.\n....\n" } }
 
-      def tick!
-        @ticks ||= 0
-        @ticks += 1
-      end
-
-      def ticks
-        @ticks ||= 0
-      end
-
-    end
-
-    let(:timer) { SimpleTimer.new }
-
-    it "ages" do
-      organism = Life::Organism.new(->{timer.tick!})
-      organism.age!
-      expect { organism.age! }.to change {timer.ticks}.by(1)
-    end
-
-  end
-
-  describe "lifecycle" do
-
-    it "is alive if it has at least one living cell" do
+    it "is stable" do
+      reference_block = new_block.call
+      block = new_block.call
+      block.age!.should == reference_block
     end
 
   end
