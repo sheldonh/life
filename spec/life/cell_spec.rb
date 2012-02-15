@@ -43,4 +43,21 @@ describe Life::Cell do
 
   end
 
+  describe "random" do
+
+    it "returns a live cell 50% of the time" do
+      Life::Cell.random(->{0}).should == Life::Cell.live
+    end
+
+    it "returns a dead cell 50% of the time" do
+      Life::Cell.random(->{1}).should == Life::Cell.dead
+    end
+
+    it "raises an ArgumentError for random numbers other than 0 and 1" do
+      expect { Life::Cell.random(->{-1}) }.to raise_error(ArgumentError)
+      expect { Life::Cell.random(->{2}) }.to raise_error(ArgumentError)
+    end
+
+  end
+
 end

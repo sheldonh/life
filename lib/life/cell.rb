@@ -22,6 +22,14 @@ module Life
       @@live
     end
 
+    def self.random(chance = ->{rand(2)})
+      case chance.call
+      when 0 then self.live
+      when 1 then self.dead
+      else raise ArgumentError
+      end
+    end
+
     private
 
     def initialize(transition_rule)
