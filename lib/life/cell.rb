@@ -1,44 +1,42 @@
+require 'life/instance_cache'
+
 module Life
 
   class Cell
 
+    include InstanceCache
+
     def transition(neighbours)
-      @transition_rule.call(neighbours) ? opposite : self
+      live_count = neighbours.select {|o| o == Life::Cell.live }.size
+      @when.call(live_count) ? @becomes.call : self
     end
 
     def self.dead
-      unless defined?(@@dead)
-        @@dead = new(->(c) {c == 3})
-        @@dead.send(:opposite, live)
+      cache_instance :dead do
+        new becomes: -> {live},
+            when: ->(live_count) {live_count == 3}
       end
-      @@dead
     end
 
     def self.live
-      unless defined?(@@live)
-        @@live ||= new(->(c) {c < 2 || c > 3})
-        @@live.send(:opposite, dead)
+      cache_instance :live do
+        new becomes: -> {dead},
+            when: ->(live_count) {live_count < 2 || live_count > 3}
       end
-      @@live
     end
 
     def self.random(chance = ->{rand(2)})
       case chance.call
-      when 0 then self.live
-      when 1 then self.dead
+      when 0 then self.dead
+      when 1 then self.live
       else raise ArgumentError
       end
     end
 
     private
 
-    def initialize(transition_rule)
-      @transition_rule = transition_rule
-    end
-
-    def opposite(new_opposite = nil)
-      @opposite = new_opposite if new_opposite
-      @opposite
+    def initialize(attrs)
+      @becomes, @when = attrs[:becomes], attrs[:when]
     end
 
   end
