@@ -39,4 +39,22 @@ describe Life::Organism do
 
   end
 
+  describe "diamond" do
+
+    # .....
+    # ..X..
+    # .X.X.
+    # ..X..
+    # .....
+    let(:new_diamond) { -> { parser.call ".....\n..X..\n.X.X.\n..X..\n.....\n" } }
+
+    it "is stable" do
+      reference_diamond = new_diamond.call
+      diamond = new_diamond.call
+      diamond.age!.should == reference_diamond
+      puts diamond.age!
+    end
+
+  end
+
 end

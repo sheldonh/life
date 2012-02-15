@@ -22,16 +22,6 @@ module Life
     private
 
     def age_cells(structure)
-      if structure.is_a?(Life::Cell)
-        structure.transition([]) # TODO supports only single-celled organisms where cells have no neighbours
-      else
-        structure.inject([]) do |memo, element|
-          memo << age_cells(element)
-        end
-      end
-    end
-
-    def age_cells(structure)
       now = []
       structure.each_with_index do |row, i|
         now[i] = []
@@ -43,11 +33,19 @@ module Life
     end
 
     def neighbours_of(i, j)
-      coords = []
-      coords << [i - 1, j - 1] << [i - 1, j] << [i - 1, j + 1]
-      coords << [i, j - 1] << [i, j + 1]
-      coords << [i + 1, j - 1] << [i + 1, j] << [i + 1, j + 1]
-      coords.map {|x, y| @structure[x, y] }
+      neighbours = []
+      (i - 1).upto(i + 1) do |x|
+        (j - 1).upto(j + 1) do |y|
+          if inbounds(x, y) && !(i == x && j == y)
+            neighbours << @structure[x][y]
+          end
+        end
+      end
+      neighbours
+    end
+
+    def inbounds(x, y)
+      x > 0 && y > 0 && x < @structure.size && y < @structure[0].size
     end
 
     def live_cells?(structure)
